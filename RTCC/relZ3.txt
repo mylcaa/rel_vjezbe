@@ -1,0 +1,109 @@
+QString format = "hh:mm:ss";
+int i = 1;
+
+Dialog::Dialog(QWidget *parent):QDialog(parent), ui(new Ui::Dialog)
+{
+	ui->setupUi(this);
+	
+	vreme = new QTime();
+	timer = new QTimer(this);
+	
+	trenutno2 = new QTime();
+	
+	connect(timer, SIGNAL(timeout()), this, SLOT(lcdSlot()));
+	timer -> start(1000);	
+}
+
+Dialog::~Dialog()
+{
+	delete ui;
+}
+
+void Dialog::on_pushButton_clicked()
+{
+	//kad se pritisne 'Potvrdi' preuzmi text iz lineEdit 'Podesi vreme:' u str
+	QString str;
+	str = ui -> lineEdit -> text();
+	
+	//pretvori string str sa vremenom u vreme:
+	*vreme = QTime::fromString(str, "hh:mm:ss");
+	
+	//ako se desi da vreme nije unijeto u dobrom formatu izbaci prozor:
+	if(!(vreme -> isValid())) QMessageBox::warning(this, "Upozorenje", "ne valja");
+
+	
+	/*lcdClear(lcd_h);
+
+	l1 = ui -> lineEdit -> text();
+	l2 = ui -> lineEdit -> text();	
+
+	qDebug() << l1;
+	qDebug() << l2;
+	
+	//QString to const char array
+	const char *r1 = l1.to StdString().c_str();
+	const char *r2 = l2.to StdString().c_str();
+
+	qDebug() << "r1" << r1;
+	qDebug() << "r2" << r2;
+
+	lcdPosition(lcd_h, 0, 0);
+	lcdPrintf(lcd_h, r1); 
+
+	lcdPosition(lcd_h, 0, 1);
+	lcdPrintf(lcd_h, r2);
+
+	delay(200); */	
+}
+
+//osjteljiv na timer 1s
+void Dialog::lcdSlot()
+{
+	lcdClear(lcd_h);
+	
+	QString time = vreme->toString(format);
+	
+	//ispisi na ekranu vreme tr
+	ui->label_3->SetText(time);
+	
+	trenutno = QTime::currentTime();
+	
+	QString tr = trenutno.toString(format);
+	
+	qDebug()<<trenutno.toString(format);
+	qDebug()<<vreme.toString(format);
+
+	const char *r3 = time.toStdString().c_str();
+	lcdPuts(lcd_h, r3);
+	
+	//uvecaj vrijeme
+	*vreme = vreme->addSecs(1);
+
+}
+
+void Dialog::on_radio1_clicked(){
+	lcdClear(lcd_h);
+	format = "hh:mm:ss";
+
+}
+
+
+void Dialog::on_radio2_clicked(){
+	lcdClear(lcd_h);
+	format = "h:m:s a";
+
+}
+
+void Dialog::on_checkBox_clicked(){
+
+	if(i){
+		lcdClear(lcd_h);
+		lcdPosition(lcd_h, 0, 0);
+	} else {
+		lcdClear(lcd_h);
+		lcdPosition(lcd_h, 0, 1);
+	}
+	
+	i = !i;
+
+}
